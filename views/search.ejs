@@ -40,15 +40,17 @@
   <!-- Main Content -->
   <div class="container">
     <div class="row">
+      <h2><%=noMatch%></h2>
       <div class="col-lg-8 col-md-10 mx-auto">
         <% for (var i = 0; i < blogpostsQ.length; i++) { %>
         <div class="post-preview">
           <a href="/post/<%=blogpostsQ[i].title %>">
+            
             <h2 class="post-title">
               <%= blogpostsQ[i].title %>
             </h2>
             <h3 class="post-subtitle">
-              <%= blogpostsQ[i].body %>           
+              <%= blogpostsQ[i].body %> 
              </h3>
           </a>
           <p class="post-meta">Posted by

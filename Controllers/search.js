@@ -1,7 +1,6 @@
 const blogpost = require('../models/blogpost.js')
 module.exports = (req, res) => {
     var noMatch = null;
-    console.log(req.query)
     if (req.query.title) {
         const regex = new RegExp(escapeRegex(req.query.title), 'gi');
         // Get all campgrounds from DB
@@ -18,7 +17,7 @@ module.exports = (req, res) => {
                     blogpostsQ: blogpostsQ,
                     noMatch: noMatch
                 });
-                console.log(blogpostsQ)
+                
             }
         });
     } else {

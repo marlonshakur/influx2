@@ -1,137 +1,44 @@
+const newPostController = require('./Controllers/newPost')
+const homeController = require('./Controllers/home')
+const aboutController = require('./Controllers/about')
+const samplePostController = require('./Controllers/samplePostController')
+const singlePageController = require('./Controllers/singlePagePost')
+const contactController = require('./Controllers/contact')
+const storePostController = require('./Controllers/storePost.js')
+const searchController = require('./Controllers/search')
+const validationMiddleware = require('./middleware/validationMiddleware')
 const fileUpload = require('express-fileupload')
 const mongoose = require('mongoose')
-const blogpost = require('./models/blogpost')
-const {
-    static
-} = require('express')
+const {static} = require('express')
 const express = require('express')
 const path = require('path')
 const app = express()
-
 const ejs = require('ejs')
-const bodyParser =
-    require('body-parser')
+const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended: true
 }))
-const {
-    use
-} = require('browser-sync')
-const {
-    data
-} = require('jquery')
+const {use} = require('browser-sync')
+const {data} = require('jquery')
 app.set('view engine', 'ejs')
 app.use(static('./public'))
 app.use(fileUpload())
-const validateMiddleWare =
-(
-req,res,next)=>{
-if(req.files == null || req.body.title == null || req.body.title == null){
-return res.redirect('/posts/new')
-}
-next()
-}
-app.use('/posts/store',validateMiddleWare)
+app.use('/posts/store',validationMiddleware)
 // CONNECTION TO MONGODB DATABASE CLOUD SERVER 
+//__________________________________________________________________________________________________________________________________
 const connectionstring = 'mongodb+srv://amr:amr123@cluster0.v8k3k.mongodb.net/influx?retryWrites=true&w=majority'
-mongoose.connect(connectionstring, {
-    useNewUrlParser: true
-}, {
-    useUnifiedTopology: true
-}, (err, data) => {
-    console.log(err)
+mongoose.connect(connectionstring, {useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true }, (err, data) => {
+    if(err){console.log(err)}
 })
+//__________________________________________________________________________________________________________________________________
 app.listen(4000)
-const homepage = path.resolve(__dirname, './views/index.html')
-const about = path.resolve(__dirname, './views/about.html')
-const post = path.resolve(__dirname, './views/post.html')
-const contact = path.resolve(__dirname, './views/contact.html')
-
-app.get('/', async (req, res) => {
-    const blogposts = await blogpost.find({}, function (err, data) {})
-    console.log('the user requested : ' + req.url)
-    res.render('index', {
-        blogposts: blogposts
-    })
-})
-app.get('/about', (req, res) => {
-    console.log('the user requested : ' + req.url)
-    res.render('about')
-})
-app.get('/post', (req, res) => {
-    res.render('sample')
-})
-app.get('/post/:id', async (req, res) => {
-    const blogpostss = await blogpost.findById((req.params.id), (err, x) => {
-        console.log(err, x)
-    })
-    res.render('post', {
-        blogpostss: blogpostss
-    })
-})
-app.get('/contact', (req, res) => {
-    console.log('the user requested : ' + req.url)
-    res.render('contact')
-})
-
-app.get('/posts/new', (req, res) => {
-    console.log(req.url)
-    res.render('create')
-})
-app.post('/posts/store', (req, res) => {
-            let image = req.files.image;
-            image.mv(path.resolve(__dirname,'public/img', image.name), async () => {
-                            await blogpost.create({...req.body,image: '/img/' + image.name}, (err, data) => {
-                                if (err) {
-                                    console.log(err)
-                                } 
-                            })
-                            res.redirect('/')
-                        }
-
-                    )})
-
-
-
-                    //INDEX - show all campgrounds
-                    app.get("/search", (req, res) => {
-                        var noMatch = null;
-                        console.log(req.query)
-                        if (req.query.title) {
-                            const regex = new RegExp(escapeRegex(req.query.title), 'gi');
-                            // Get all campgrounds from DB
-                            const searchquery = blogpost.find({
-                                body: regex
-                            }, function (err, blogpostsQ) {
-                                if (err) {
-                                    console.log(err);
-                                } else {
-                                    if (blogpostsQ.length < 1) {
-                                        noMatch = "No posts match that query, please try again.";
-                                    }
-                                    res.render("search", {
-                                        blogpostsQ: blogpostsQ,
-                                        noMatch: noMatch
-                                    });
-                                    console.log(blogpostsQ)
-                                }
-                            });
-                        } else {
-                            // Get all campgrounds from DB
-                            blogpost.find({}, function (err, blogpostsQ) {
-                                if (err) {
-                                    console.log(err);
-                                } else {
-                                    res.render("search", {
-                                        blogpostsQ: blogpostsQ,
-                                        noMatch: noMatch
-                                    });
-                                }
-                            });
-                        }
-                    });
-
-                    function escapeRegex(text) {
-                        return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-                    };
+app.get('/',homeController)
+app.get('/about',aboutController)
+app.get('/post',samplePostController)
+app.get('/post/:id', singlePageController)
+app.get('/contact',contactController)
+app.get('/posts/new',newPostController)
+app.post('/posts/store',storePostController)
+//INDEX - show all campgrounds
+app.get("/search",searchController) 
